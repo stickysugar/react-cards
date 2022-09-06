@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import DrawnCards from "./DrawnCards"
 
 const DECK_CARD_BASE_URL = "https://deckofcardsapi.com/api/deck";
 
@@ -13,9 +14,9 @@ function Cards() {
     }
   );
 
-  const [card, setCard] = useState("");
+  const [drawnCards, setDrawnCards] = useState([]);
 
-/** calls API to fetch initial deck of cards */
+  /** calls API to fetch initial deck of cards */
   useEffect(function fetchDeck() {
     async function getDeck() {
       const resp = await axios.get(`${DECK_CARD_BASE_URL}/new/shuffle`);
@@ -31,15 +32,20 @@ function Cards() {
 
   }, []);
 
-  console.log("DECK ID", deckId);
-
   /** calls API to get card from initial deck of cards */
-  async function getCard() {
+  async function getDrawnCard() {
     const resp = await axios.get(`${DECK_CARD_BASE_URL}/${deckId.data}/draw`);
     if (resp.data.cards[0].length === 0) alert("Error: no cards remaining!");
-    else setCard(`${resp.data.cards[0].value} of ${resp.data.cards[0].suit}`);
+    else setDrawnCards(drawnCards => [...drawnCards,
+    resp.data.cards[0].image]);
   }
-
+  
+  async function shuffleDeck() {
+    document.querySelector(".draw-card").disabled = true;
+    await axios.post(`${DECK_CARD_BASE_URL}/${deckId.data}/shuffle`);
+    setDrawnCards([]);
+    document.querySelector(".draw-card").disabled = false;
+  }
 
   if (deckId.isLoading) {
     return <p> LOADING ... </p>;
@@ -47,8 +53,11 @@ function Cards() {
 
   return (
     <div>
-      <button onClick={getCard}> get a card ! </button>
-      <div>{card}</div>
+      <button className="shuffle-deck" onClick={shuffleDeck}> SHUFFLE DECK ! </button>
+      <button className="draw-card" onClick={getDrawnCard}> get a card ! </button>
+      <ul>
+        {drawnCards.slice().reverse().map(card => <DrawnCards cardImg={card} key={card} />)}
+      </ul>
     </div>
   );
 
