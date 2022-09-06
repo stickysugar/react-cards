@@ -36,6 +36,7 @@ function Cards() {
   async function getDrawnCard() {
     const resp = await axios.get(`${DECK_CARD_BASE_URL}/${deckId.data}/draw`);
     if (resp.data.cards[0].length === 0) alert("Error: no cards remaining!");
+    // they did a try catch here in the solution, by throwing an error if no cards remaining
     else setDrawnCards(drawnCards => [...drawnCards,
     resp.data.cards[0].image]);
   }
@@ -46,6 +47,10 @@ function Cards() {
     setDrawnCards([]);
     document.querySelector(".draw-card").disabled = false;
   }
+  
+  // instead of doing it like this, the solution used another state that switches to true/false
+  // and put in the button: disabled = {isShuffling}
+  // they used try, catch, finally to set the state to true/false
 
   if (deckId.isLoading) {
     return <p> LOADING ... </p>;
